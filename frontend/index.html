@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ZEUS — Assistente de IA Pessoal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#0b0f14" />
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="icon.svg" />
+</head>
+<body>
+
+<div class="scanlines" aria-hidden="true"></div>
+
+<div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+<div class="app">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-glyph" id="brand-glyph">
+        <svg viewBox="0 0 60 60" class="bolt">
+          <polygon points="34,2 12,34 27,34 22,58 50,24 33,24" />
+        </svg>
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">ZEUS</span>
+        <span class="brand-tag">Sistema de IA Pessoal</span>
+      </div>
+      <button class="sidebar-close" id="sidebar-close" aria-label="Fechar menu">✕</button>
+    </div>
+
+    <button class="new-chat-btn" id="new-chat-btn">
+      <span>+ Nova conversa</span>
+    </button>
+
+    <nav class="conv-list" id="conv-list" aria-label="Conversas">
+      <p class="section-label">Conversas recentes</p>
+      <!-- itens injetados via JS -->
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="ghost-btn" id="nav-notes">Anotações</button>
+      <button class="ghost-btn" id="nav-docs">Documentos</button>
+      <button class="ghost-btn" id="nav-admin" hidden>Painel Admin</button>
+      <div class="user-chip" id="user-chip">
+        <span class="dot online"></span>
+        <span id="user-name">visitante</span>
+        <button class="mini-btn" id="change-password-btn" title="Alterar senha">Senha</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===================== MAIN ===================== -->
+  <main class="main">
+
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-btn" id="menu-btn" aria-label="Abrir menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="status-line">
+          <span class="status-dot" id="status-dot"></span>
+          <span class="status-text" id="status-text">ZEUS EM ESPERA</span>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="lang-btn" title="Idioma">PT-BR</button>
+        <button class="icon-btn" id="login-btn" title="Entrar">Entrar</button>
+      </div>
+    </header>
+
+    <!-- ===================== MODAL DE LOGIN / CADASTRO ===================== -->
+    <div class="modal-overlay" id="auth-overlay" hidden>
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+        <div class="modal-tabs">
+          <button type="button" class="modal-tab active" id="tab-login" data-tab="login">Entrar</button>
+          <button type="button" class="modal-tab" id="tab-register" data-tab="register">Criar conta</button>
+        </div>
+
+        <h2 class="modal-title" id="auth-title">Entrar no Zeus</h2>
+
+        <form id="login-form" class="modal-form">
+          <label class="field-label" for="login-username">Usuário</label>
+          <input class="field-input" id="login-username" type="text" autocomplete="username" required />
+
+          <label class="field-label" for="login-password">Senha</label>
+          <input class="field-input" id="login-password" type="password" autocomplete="current-password" required />
+
+          <p class="field-error" id="login-error"></p>
+          <button type="submit" class="modal-submit">Entrar</button>
+        </form>
+
+        <form id="register-form" class="modal-form" hidden>
+          <label class="field-label" for="register-username">Usuário</label>
+          <input class="field-input" id="register-username" type="text" autocomplete="username" required minlength="3" />
+
+          <label class="field-label" for="register-email">E-mail</label>
+          <input class="field-input" id="register-email" type="email" autocomplete="email" required />
+
+          <label class="field-label" for="register-password">Senha</label>
+          <input class="field-input" id="register-password" type="password" autocomplete="new-password" required minlength="8" />
+          <p class="field-hint">Mínimo de 8 caracteres.</p>
+
+          <p class="field-error" id="register-error"></p>
+          <button type="submit" class="modal-submit">Criar conta</button>
+        </form>
+
+        <button type="button" class="modal-close" id="auth-close" aria-label="Fechar">✕</button>
+      </div>
+    </div>
+
+    <!-- ===================== MODAL: TROCAR SENHA ===================== -->
+    <div class="modal-overlay" id="password-overlay" hidden>
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="password-title">
+        <h2 class="modal-title" id="password-title">Alterar senha</h2>
+        <form id="password-form" class="modal-form">
+          <label class="field-label" for="current-password">Senha atual</label>
+          <input class="field-input" id="current-password" type="password" autocomplete="current-password" required />
+
+          <label class="field-label" for="new-password">Nova senha</label>
+          <input class="field-input" id="new-password" type="password" autocomplete="new-password" required minlength="8" />
+          <p class="field-hint">Mínimo de 8 caracteres. Você continuará conectado após a troca.</p>
+
+          <p class="field-error" id="password-error"></p>
+          <button type="submit" class="modal-submit">Salvar nova senha</button>
+        </form>
+        <button type="button" class="modal-close" id="password-close" aria-label="Fechar">✕</button>
+      </div>
+    </div>
+
+    <!-- ===================== DRAWER: ANOTAÇÕES ===================== -->
+    <div class="modal-overlay" id="notes-overlay" hidden>
+      <div class="modal panel-drawer" role="dialog" aria-modal="true" aria-labelledby="notes-title">
+        <h2 class="modal-title" id="notes-title">Anotações</h2>
+        <form id="notes-form" class="modal-form panel-form">
+          <label class="field-label" for="note-title">Título</label>
+          <input class="field-input" id="note-title" type="text" required maxlength="120" />
+          <label class="field-label" for="note-content">Conteúdo</label>
+          <textarea class="field-input" id="note-content" rows="3"></textarea>
+          <button type="submit" class="modal-submit">Adicionar anotação</button>
+        </form>
+        <div class="panel-list" id="notes-list"></div>
+        <button type="button" class="modal-close" id="notes-close" aria-label="Fechar">✕</button>
+      </div>
+    </div>
+
+    <!-- ===================== DRAWER: DOCUMENTOS ===================== -->
+    <div class="modal-overlay" id="docs-overlay" hidden>
+      <div class="modal panel-drawer" role="dialog" aria-modal="true" aria-labelledby="docs-title">
+        <h2 class="modal-title" id="docs-title">Documentos</h2>
+        <form id="docs-form" class="modal-form panel-form">
+          <label class="field-label" for="doc-file">Enviar arquivo (PDF, DOCX, TXT ou MD)</label>
+          <input class="field-input" id="doc-file" type="file" accept=".pdf,.docx,.txt,.md" required />
+          <p class="field-error" id="docs-error"></p>
+          <button type="submit" class="modal-submit">Enviar documento</button>
+        </form>
+        <div class="panel-list" id="docs-list"></div>
+        <button type="button" class="modal-close" id="docs-close" aria-label="Fechar">✕</button>
+      </div>
+    </div>
+
+    <!-- ===================== DRAWER: PAINEL ADMIN ===================== -->
+    <div class="modal-overlay" id="admin-overlay" hidden>
+      <div class="modal panel-drawer" role="dialog" aria-modal="true" aria-labelledby="admin-title">
+        <h2 class="modal-title" id="admin-title">Painel Admin</h2>
+        <div class="admin-stats" id="admin-stats"></div>
+        <p class="section-label">Usuários</p>
+        <div class="panel-list" id="admin-users"></div>
+        <button type="button" class="modal-close" id="admin-close" aria-label="Fechar">✕</button>
+      </div>
+    </div>
+
+    <section class="core-stage" id="core-stage">
+      <div class="core" id="core">
+        <svg viewBox="0 0 200 200" class="core-rings">
+          <circle class="ring ring-1" cx="100" cy="100" r="90" />
+          <circle class="ring ring-2" cx="100" cy="100" r="70" />
+          <circle class="ring ring-3" cx="100" cy="100" r="50" />
+        </svg>
+        <svg viewBox="0 0 60 60" class="core-bolt">
+          <polygon points="34,2 12,34 27,34 22,58 50,24 33,24" />
+        </svg>
+      </div>
+      <p class="core-caption" id="core-caption">Diga "Zeus" ou digite um comando para começar.</p>
+    </section>
+
+    <section class="chat" id="chat" aria-live="polite"></section>
+
+    <form class="composer" id="composer">
+      <button type="button" class="mic-btn" id="mic-btn" title="Falar com o Zeus">
+        <svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>
+      </button>
+      <input
+        type="text"
+        id="message-input"
+        class="text-input"
+        placeholder="Pergunte algo ao Zeus…"
+        autocomplete="off"
+      />
+      <button type="submit" class="send-btn" id="send-btn">Enviar</button>
+    </form>
+  </main>
+
+  <!-- ===================== PAINEL LATERAL DIREITO ===================== -->
+  <aside class="context-panel" id="context-panel">
+    <p class="section-label">Contexto de memória</p>
+    <div class="context-list" id="context-list">
+      <p class="empty-hint">Resultados da busca semântica aparecerão aqui durante a conversa.</p>
+    </div>
+
+    <p class="section-label">Extensões ativas</p>
+    <div class="plugin-list" id="plugin-list"></div>
+
+    <p class="section-label">Lembretes pendentes</p>
+    <div class="reminder-list" id="reminder-list">
+      <p class="empty-hint">Nenhum lembrete pendente.</p>
+    </div>
+
+    <p class="section-label">Atividade recente</p>
+    <div class="activity-log" id="activity-log"></div>
+  </aside>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

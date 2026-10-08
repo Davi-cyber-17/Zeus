@@ -1,0 +1,19 @@
+{
+  "name": "Zeus — Assistente de IA Pessoal",
+  "short_name": "Zeus",
+  "description": "Assistente de inteligência artificial pessoal, modular e seguro.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#05070c",
+  "theme_color": "#0b0f14",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
